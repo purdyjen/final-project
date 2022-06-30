@@ -1,7 +1,7 @@
 // Create the HTML for a task
 // it is a function that creates a new task with this parameters
-const createTaskHtml = (name, description, assignedTo, dueDate, status) => `
-    <li class="list-group-item">
+const createTaskHtml = (id, name, description, assignedTo, dueDate, status) => `
+    <li class="list-group-item" data-task-id=${id}>
         <div class="d-flex w-100 mt-2 justify-content-between align-items-center">
             <h5>${name}</h5>
             <span class="badge badge-danger">${status}</span>
@@ -11,57 +11,88 @@ const createTaskHtml = (name, description, assignedTo, dueDate, status) => `
             <small>Due: ${dueDate}</small>
         </div>
         <p>${description}</p>
+        <div class="d-flex w-100 justify-content-end">
+            <button class="btn btn-outline-success done-button ${
+              status === "TODO" ? "visible" : "invisible"
+            }">Mark As Done</button>
+            <button class="btn btn-outline-danger delete-button">Delete</button>
+        </div>
     </li>
 `;
 class TaskManager {
-    //created a class of objects
-    //set up the task and current ID properties in the constructor
-    constructor(currentId = 0) {
-        //constructor is creating and initializing an object of the class
-        this.tasks = [];
-        //we give this object a task with empty array
-        this.currentId = currentId;
-        // we give this object an ID that is the same as current id
+  constructor(currentId = 0) {
+    this.tasks = [];
+    this.currentId = currentId;
+  }
+
+  addTask(name, description, assignedTo, dueDate) {
+    const task = {
+      id: this.currentId++,
+      name: name,
+      description: description,
+      assignedTo: assignedTo,
+      dueDate: dueDate,
+      status: "TODO",
+    };
+    this.tasks.push(task);
+  }
+
+  getTaskById(taskId) {
+    let foundTask;
+    for (let i = 0; i < this.tasks.length; i++) {
+      const task = this.tasks[i];
+      if (task.id === taskId) {
+        foundTask = task;
+      }
     }
-    // create the addTask method
-    addTask(name, description, assignedTo, dueDate) {
-        //we add a method to he object we just created, that takes these arguments
-        const task = {
-            //inside the method we created a variable const
-            // increment current id property
-            id: this.currentId++,
-            // the id of this variable grows incrementally with every round
-            name: name,
-            description: description,
-            assignedTo: assignedTo,
-            dueDate: dueDate,
-            status: 'TODO'
-        };
-        //push task to the task property
-        this.tasks.push(task);
-        console.log(this.tasks);
-        // an array method pushes new task to the end of the array variable (empty array) we created at the top
+    return foundTask;
+  }
+
+  render() {
+    const taskHtmlList = [];
+    for (let i = 0; i < this.tasks.length; i++) {
+      const task = this.tasks[i];
+      const date = new Date(task.dueDate.replace(/-/g, "/"));
+      const formattedDate =
+        date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
+      const taskHtml = createTaskHtml(
+        task.id,
+        task.name,
+        task.description,
+        task.assignedTo,
+        formattedDate,
+        task.status
+      );
+      taskHtmlList.push(taskHtml);
     }
-        // Create the render method
-        render() {
-            // Create an array or set or bucket to store the tasks
-            const taskHtmlList = [];
-            // I want to creat a loop to iterate over our tasks and create the html and also store them in the array.
-            for (let i = 0; i < this.tasks.length; i++) {
-                // I want to get the current task in the loop
-                const task = this.tasks[i];
-                //I want to format the date
-                const date = new Date(task.dueDate);
-                const formattedDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-                // I want to create the task HTML
-                const taskHtml = createTaskHtml(task.name, task.description, task.assignedTo, formattedDate, task.status);
-                // Now, I want to push this info to the taskHtmlList array
-                taskHtmlList.push(taskHtml);
-            }
-            // Now, I want to create the taskHtml by joining each item in the tasksHtmlList with a new line in between each item
-            const taskHtml = taskHtmlList.join('\n');
-            // Now, just set the inner html of the tasklist on the page
-            const tasklist = document.querySelector('#taskList');
-            tasklist.innerHTML = taskHtml;
-        }
-         }
+    const taskHtml = taskHtmlList.join("\n");
+    const tasklist = document.querySelector("#taskList");
+    tasklist.innerHTML = taskHtml;
+  }
+
+  save() {
+    // Converts the object (this.tasks) into a JSON string to allow for easy persistent storage
+    const tasksJson = JSON.stringify(this.tasks);
+    // Saves the new JSON string to user's local storage
+    localStorage.setItem("tasks", tasksJson);
+    // converts currentId to a string to save to local storage
+    const currentId = String(this.currentId);
+    // Saves the currentId to localStorage so that currentId isn't reset when the page is refreshed
+    localStorage.setItem("currentId", currentId);
+  }
+
+  // Before rendering anything, this function checks to see if anything is saved to local storage and, if so, grabs the data stored
+  load() {
+    if (localStorage.getItem("tasks")) {
+      const tasksJson = localStorage.getItem("tasks");
+        // Converts the string back into an object
+      this.tasks = JSON.parse(tasksJson);
+    }
+
+    if (localStorage.getItem("currentId")) {
+      const currentId = localStorage.getItem("currentId");
+        // Converts the string back into a number
+      this.currentId = Number(currentId);
+    }
+  }
+}
