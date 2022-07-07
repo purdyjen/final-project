@@ -1,5 +1,3 @@
-// Create the HTML for a task
-// it is a function that creates a new task with this parameters
 const createTaskHtml = (id, name, description, assignedTo, dueDate, status) => `
     <li class="list-group-item" data-task-id=${id}>
         <div class="d-flex w-100 mt-2 justify-content-between align-items-center">
@@ -19,6 +17,7 @@ const createTaskHtml = (id, name, description, assignedTo, dueDate, status) => `
         </div>
     </li>
 `;
+
 class TaskManager {
   constructor(currentId = 0) {
     this.tasks = [];
@@ -35,6 +34,20 @@ class TaskManager {
       status: "TODO",
     };
     this.tasks.push(task);
+  }
+
+  deleteTask(taskId) {
+    const newTasks = [];
+
+    for (let i = 0; i < this.tasks.length; i++) {
+      const task = this.tasks[i];
+      if (task.id !== taskId) {
+        newTasks.push(task);
+      }
+    }
+
+    // Set this.tasks to newTasks
+    this.tasks = newTasks;
   }
 
   getTaskById(taskId) {
@@ -85,13 +98,13 @@ class TaskManager {
   load() {
     if (localStorage.getItem("tasks")) {
       const tasksJson = localStorage.getItem("tasks");
-        // Converts the string back into an object
+      // Converts the string back into an object
       this.tasks = JSON.parse(tasksJson);
     }
 
     if (localStorage.getItem("currentId")) {
       const currentId = localStorage.getItem("currentId");
-        // Converts the string back into a number
+      // Converts the string back into a number
       this.currentId = Number(currentId);
     }
   }

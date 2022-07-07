@@ -9,22 +9,20 @@ taskManager.render();
 
 const newTaskForm = document.querySelector("#newTaskForm");
 
-newTaskForm.addEventListener("submit", (event) => {
-  // Prevent default action
-  event.preventDefault();
-  // Select the inputs by assigning the first HTML elements to constant variables
+newTaskForm.addEventListener("submit", (e) => {
+
+  e.preventDefault();
+
   const newTaskNameInput = document.querySelector("#newTaskNameInput");
   const newTaskDescription = document.querySelector("#newTaskDescription");
   const newTaskAssignedTo = document.querySelector("#newTaskAssignedTo");
   const newTaskDueDate = document.querySelector("#newTaskDueDate");
 
-  //assigning the values of the new elements to constant variables
   const name = newTaskNameInput.value;
   const description = newTaskDescription.value; //mistake
   const assignedTo = newTaskAssignedTo.value;
   const dueDate = newTaskDueDate.value;
 
-  //if the input is not valid in any section of a new task, the program outputs the message 'invalid input'
   if (!name || !description || !assignedTo || !dueDate) {
     let string = "";
     if (!name) {
